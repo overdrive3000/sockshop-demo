@@ -462,7 +462,15 @@ spec:
     spec:
       containers:
       - name: payment
-        image: weaveworksdemos/payment:0.4.3
+        image: overdrive3000/payment:0.0.4-debug
+        command:
+        - /payment
+        args:
+        - -port=80
+
+        env:
+        - name: ZIPKIN
+          value: aws-otel-eks.observability.svc.cluster.local:9411
         resources:
           limits:
             cpu: 200m
@@ -474,7 +482,7 @@ spec:
         - containerPort: 80
         securityContext:
           runAsNonRoot: true
-          runAsUser: 10001
+          runAsUser: 65543
           capabilities:
             drop:
               - all
@@ -485,13 +493,13 @@ spec:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 300
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 180
+          initialDelaySeconds: 18
           periodSeconds: 3
       nodeSelector:
         beta.kubernetes.io/os: linux
