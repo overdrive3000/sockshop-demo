@@ -775,7 +775,11 @@ spec:
     spec:
       containers:
       - name: user
-        image: weaveworksdemos/user:0.4.7
+        image: overdrive3000/user:0.0.6
+        command:
+        - /user
+        args:
+        - -port=80
         resources:
           limits:
             cpu: 300m
@@ -788,9 +792,17 @@ spec:
         env:
         - name: mongo
           value: user-db:27017
+        - name: HATEAOS
+          value: user
+        - name: USER_DATABASE
+          value: mongodb
+        - name: MONGO_HOST
+          value: user-db:27017
+        - name: ZIPKIN
+          value: aws-otel-eks.observability.svc.cluster.local:9411
         securityContext:
           runAsNonRoot: true
-          runAsUser: 10001
+          runAsUser: 65534
           capabilities:
             drop:
               - all
@@ -801,13 +813,13 @@ spec:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 300
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /health
             port: 80
-          initialDelaySeconds: 180
+          initialDelaySeconds: 18
           periodSeconds: 3
       nodeSelector:
         beta.kubernetes.io/os: linux
