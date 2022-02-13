@@ -12,7 +12,7 @@ metadata:
     name: load-test
   namespace: loadtest
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       name: load-test
@@ -22,9 +22,9 @@ spec:
         name: load-test
     spec:
       containers:
-      - name: load-test
-        image: weaveworksdemos/load-test:0.1.1
-        command: ["/bin/sh"]
-        args: ["-c", "while true; do locust --host http://front-end.sock-shop.svc.cluster.local -f /config/locustfile.py --clients 5 --hatch-rate 5 --num-request 100 --no-web; done"]
+        - name: load-test
+          image: weaveworksdemos/load-test:0.1.1
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do locust --host http://k8s-sockshop-frontend-0642236033-666923439.eu-central-1.elb.amazonaws.com -f /config/locustfile.py --clients 5 --hatch-rate 5 --num-request 100 --no-web; done"]
       nodeSelector:
         beta.kubernetes.io/os: linux
