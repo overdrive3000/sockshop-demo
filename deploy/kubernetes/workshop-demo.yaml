@@ -4,6 +4,32 @@ kind: Namespace
 metadata:
   name: sock-shop
 ---
+# Define IngressClassParams to be used by Ingress resource
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: IngressClassParams
+metadata:
+  name: sock-shop
+spec:
+  scheme: internet-facing
+  tags:
+    - key: auto-stop
+      value: "false"
+    - key: auto-delete
+      value: "false"
+    - key: project
+      value: workshop
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: IngressClass
+metadata:
+  name: alb
+spec:
+  controller: ingress.k8s.aws/alb
+  parameters:
+    apiGroup: elbv2.k8s.aws
+    kind: IngressClassParams
+    name: sock-shop
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -336,13 +362,30 @@ metadata:
     name: front-end
   namespace: sock-shop
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 8079
-      nodePort: 30001
   selector:
     name: front-end
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: front-end
+  namespace: sock-shop
+  annotations:
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: front-end
+              servicePort: 80
 ---
 apiVersion: apps/v1
 kind: Deployment
